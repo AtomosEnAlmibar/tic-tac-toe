@@ -1,35 +1,47 @@
 function createPlayer(symbol) {
     const playerSymbol = symbol;
-    
+
     let playerName;
     let opponent;
     let itsTurn = false;
     let victories = 0;
 
     const getName = () => playerName;
-    const setName = (name) => playerName = name; 
+    const setName = (name) => playerName = name;
+    const setOpponent = (opponentChosen) => opponent = opponentChosen;
     const getVictories = () => victories;
     const addVictory = () => victories++;
-    const changeTurn = () => !itsTurn;
+    const getTurn = () => itsTurn;
+    const changeTurn = () => itsTurn = !itsTurn;
     const endTurn = () => itsTurn = false;
     const placePiece = (x, y) => {
+        if (!itsTurn) return;
         const positionChosen = board.getPosition(x, y);
-        positionChosen.fillPosition();
+        let hasBeenFilled = positionChosen.fillPosition(playerSymbol);
+        if (hasBeenFilled) checkWinCondition();
     };
     const checkWinCondition = () => {
-        let result = board.checkWinCondition();
-        if (result === false) {
-            endTurn();
-            opponent.changeTurn();
-            return;
+        let result = board.checkWinCondition(playerSymbol);
+        
+        switch (result) {
+            case true:
+                addVictory();
+                console.log(`${getName()} wins!`)
+                break;
+            case false:
+                endTurn();
+                opponent.changeTurn();
+                return;
+            default:
+                console.log("ITSA A DRAW")
+                break;            
         }
-        if (result === true) addVictory();
         endTurn();
         opponent.endTurn();
         board.resetBoard();
     }
 
-    return { playerSymbol, opponent, getName, setName, getVictories, addVictory, changeTurn, endTurn, placePiece, checkWinCondition };
+    return { playerSymbol, getName, setName, setOpponent, getVictories, addVictory, getTurn, changeTurn, endTurn, placePiece, checkWinCondition };
 }
 
 function createPosition(x, y, filled = '') {
@@ -40,7 +52,9 @@ function createPosition(x, y, filled = '') {
     const getFill = () => fill;
     const canBeFilled = () => !fill;
     const fillPosition = (symbol) => {
-        if (canBeFilled()) fill = symbol;
+        if (!canBeFilled()) return false;
+        fill = symbol;
+        return true;
     }
     const resetFill = () => fill = '';
 
@@ -95,5 +109,5 @@ const board = (() => {
 let player1 = createPlayer('O');
 let player2 = createPlayer('X');
 
-player1.opponent = player2;
-player2.opponent = player1;
+player1.setOpponent(player2);
+player2.setOpponent(player1);
