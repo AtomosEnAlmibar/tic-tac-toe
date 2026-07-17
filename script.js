@@ -1,11 +1,13 @@
-function createPlayer(name, symbol) {
+function createPlayer(symbol) {
     const playerSymbol = symbol;
-    const playerName = name;
-
+    
+    let playerName;
+    let opponent;
     let itsTurn = false;
     let victories = 0;
-    let opponent;
 
+    const getName = () => playerName;
+    const setName = (name) => playerName = name; 
     const getVictories = () => victories;
     const addVictory = () => victories++;
     const changeTurn = () => !itsTurn;
@@ -27,7 +29,7 @@ function createPlayer(name, symbol) {
         board.resetBoard();
     }
 
-    return { playerName, playerSymbol, opponent, getVictories, addVictory, changeTurn, endTurn, placePiece, checkWinCondition };
+    return { playerSymbol, opponent, getName, setName, getVictories, addVictory, changeTurn, endTurn, placePiece, checkWinCondition };
 }
 
 function createPosition(x, y, filled = '') {
@@ -89,3 +91,9 @@ const board = (() => {
 
     return { positions, getPosition, resetBoard, isBoardFull, checkWinCondition };
 })();
+
+let player1 = createPlayer('O');
+let player2 = createPlayer('X');
+
+player1.opponent = player2;
+player2.opponent = player1;
