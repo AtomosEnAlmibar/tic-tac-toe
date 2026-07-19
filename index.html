@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,43 @@
     <link rel="stylesheet" href="styles.css">
     <script src="script.js" defer></script>
 </head>
+
 <body>
-    
+    <div class="board">
+    </div>
+    <button class="open-add-book-dialog-button">Add book</button>
+    <dialog id="set-player-name-dialog">
+        <form class="dialog-flex">
+            <span class="dialog-main-title">Select names</span>
+            <div class="form-block">
+                <div class="fieldset">
+                    <label for="title">Player 1</label>
+                    <input type="text" name="title" id="title" required>
+                </div>
+                <div class="fieldset">
+                    <label for="author">Player 2</label>
+                    <input type="text" name="author" id="author" required>
+                </div>
+            </div>
+            <button class="dialog-confirm-button" id="set-player-name-button" type="submit">Confirm</button>
+        </form>
+    </dialog>
+    <dialog id="restart-game-dialog">
+        <div class="dialog-flex">
+            <span class="dialog-main-title">Player 1 wins!</span>
+            <div class="player-scores-list">
+                <div class="player-score-block">
+                    <span class="player-name">Player 1</span>
+                    <span class="player-score">1</span>
+                </div>
+                <div class="player-score-block">
+                    <span class="player-name">Player 2</span>
+                    <span class="player-score">0</span>
+                </div>
+            </div>
+            <button class="dialog-confirm-button" id="restart-game">Restart</button>
+        </div>
+    </dialog>
 </body>
+
 </html>

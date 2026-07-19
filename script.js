@@ -2,46 +2,37 @@ function createPlayer(symbol) {
     const playerSymbol = symbol;
 
     let playerName;
-    let opponent;
-    let itsTurn = false;
     let victories = 0;
 
     const getName = () => playerName;
     const setName = (name) => playerName = name;
-    const setOpponent = (opponentChosen) => opponent = opponentChosen;
     const getVictories = () => victories;
     const addVictory = () => victories++;
-    const getTurn = () => itsTurn;
-    const changeTurn = () => itsTurn = !itsTurn;
-    const endTurn = () => itsTurn = false;
     const placePiece = (x, y) => {
-        if (!itsTurn) return;
         const positionChosen = board.getPosition(x, y);
         let hasBeenFilled = positionChosen.fillPosition(playerSymbol);
         if (hasBeenFilled) checkWinCondition();
     };
     const checkWinCondition = () => {
         let result = board.checkWinCondition(playerSymbol);
-        
+
         switch (result) {
             case true:
                 addVictory();
                 console.log(`${getName()} wins!`)
                 break;
             case false:
-                endTurn();
-                opponent.changeTurn();
+                board.switchActivePlayer();
                 return;
             default:
                 console.log("ITSA A DRAW")
-                break;            
+                break;
         }
-        endTurn();
-        opponent.endTurn();
+        board.switchActivePlayer();
         board.resetBoard();
     }
 
-    return { playerSymbol, getName, setName, setOpponent, getVictories, addVictory, getTurn, changeTurn, endTurn, placePiece, checkWinCondition };
+    return { playerSymbol, getName, setName, getVictories, addVictory, placePiece, checkWinCondition };
 }
 
 function createPosition(x, y, filled = '') {
@@ -62,7 +53,11 @@ function createPosition(x, y, filled = '') {
 }
 
 const board = (() => {
+    const player1 = createPlayer('O');
+    const player2 = createPlayer('X');
+
     let positions = [];
+    let activePlayer = player1;
 
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
@@ -70,6 +65,8 @@ const board = (() => {
         }
     }
 
+    const getActivePlayer = () => activePlayer;
+    const switchActivePlayer = () => activePlayer = activePlayer === player1 ? player2 : player1;
     const getPosition = (x, y) => positions.find(position => position.positionX == x && position.positionY == y);
     const resetBoard = () => positions.forEach(position => position.resetFill());
     const isBoardFull = () => {
@@ -103,11 +100,65 @@ const board = (() => {
         return result;
     }
 
-    return { positions, getPosition, resetBoard, isBoardFull, checkWinCondition };
+    return { positions, getActivePlayer, switchActivePlayer, getPosition, resetBoard, isBoardFull, checkWinCondition };
 })();
 
-let player1 = createPlayer('O');
-let player2 = createPlayer('X');
+function createViewController() {
+    const boardElement = document.querySelector(".board");
 
-player1.setOpponent(player2);
-player2.setOpponent(player1);
+    boardElement.addEventListener("click", (event) => {
+        const postitionView = event.target.closest(".position");
+        if (!postitionView) return;
+        console.log("la posisao", JSON.parse(postitionView.dataset.position))
+
+    });
+
+    const updateScreen = () => {
+        boardElement.innerHTML = "";
+        board.positions.forEach(position => {
+            const positionElement = document.createElement("div");
+            positionElement.classList.add("position");
+            positionElement.dataset.position = `[${position.positionX},${position.positionY}]`;
+            positionElement.textContent = position.getFill();
+
+            boardElement.appendChild(positionElement);
+        });
+    }
+
+    return { updateScreen }
+}
+
+const showBtnElem = document.querySelector(".open-add-book-dialog-button");
+const dialogElem1 = document.getElementById("dialog");
+const dialogElem2 = document.getElementById("dialog2");
+const addBookButtonElem = document.getElementById("set-player-name-button");
+
+showBtnElem.addEventListener("click", () => {
+    dialogElem2.showModal();
+});
+
+addBookButtonElem.addEventListener("click", () => {
+    event.preventDefault();
+    dialogElem2.close();
+});
+
+
+
+const boardView2 = createViewController();
+
+// let product = document.getElementById("test").dataset.position;
+// console.log("bruh", JSON.parse(product))
+
+
+//   <div class="book-card">
+//       <div class="book-id">${book.id}</div>
+//       <div class="book-info">
+//           <div class="book-title">${book.title}</div>
+//           <div class="book-author">${book.author}</div>
+//       </div>
+//       <div class="book-pages">${book.pages} pages</div>
+//       <div class="book-button-list">
+//           <button class="mark-book-button ${book.read ? 'read' : ''}"><img src="./assets/check-bold.svg" alt="check"><span>${book.read ? 'Read' : 'Mark as read'}</span></button>
+//           <button class="delete-book-button"><img src="./assets/delete.svg" alt="trash"><span>Delete</span></button>
+//       </div>
+//   </div>
