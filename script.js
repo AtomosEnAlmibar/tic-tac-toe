@@ -19,20 +19,17 @@ function createPlayer(symbol) {
         switch (result) {
             case true:
                 addVictory();
-                console.log(`${getName()} wins!`)
                 break;
             case false:
                 board.switchActivePlayer();
                 return;
             default:
-                console.log("ITSA A DRAW")
                 break;
         }
-        board.switchActivePlayer();
-        board.resetBoard();
+        viewController.showRestartGameDialog(result);
     }
 
-    return { playerSymbol, getName, setName, getVictories, addVictory, placePiece, checkWinCondition };
+    return { playerSymbol, getName, setName, getVictories, placePiece };
 }
 
 function createPosition(x, y, filled = '') {
@@ -65,6 +62,10 @@ const board = (() => {
         }
     }
 
+    const restartGame = () => {
+        switchActivePlayer();
+        resetBoard();
+    };
     const getActivePlayer = () => activePlayer;
     const switchActivePlayer = () => activePlayer = activePlayer === player1 ? player2 : player1;
     const getPosition = (x, y) => positions.find(position => position.positionX == x && position.positionY == y);
@@ -100,20 +101,18 @@ const board = (() => {
         return result;
     }
 
-    return { positions, getActivePlayer, switchActivePlayer, getPosition, resetBoard, isBoardFull, checkWinCondition };
+    return { player1, player2, positions, restartGame, getActivePlayer, switchActivePlayer, getPosition, resetBoard, isBoardFull, checkWinCondition };
 })();
 
-function createViewController() {
+const viewController = (() => {
     const boardElement = document.querySelector(".board");
+    const turnMessageElement = document.querySelector(".turn-message");
+    const setPlayerNameDialog = document.getElementById("set-player-name-dialog");
+    const restartGameDialog = document.getElementById("restart-game-dialog");
+    const setPlayerNameButton = document.getElementById("set-player-name-button");
+    const formElem = document.querySelector('form');
 
-    boardElement.addEventListener("click", (event) => {
-        const postitionView = event.target.closest(".position");
-        if (!postitionView) return;
-        console.log("la posisao", JSON.parse(postitionView.dataset.position))
-
-    });
-
-    const updateScreen = () => {
+    const updateBoard = () => {
         boardElement.innerHTML = "";
         board.positions.forEach(position => {
             const positionElement = document.createElement("div");
@@ -125,40 +124,69 @@ function createViewController() {
         });
     }
 
-    return { updateScreen }
-}
+    const updateMessageTurn = () => {
+        turnMessageElement.innerHTML = `${board.getActivePlayer().getName()}'s Turn!`;
+    }
 
-const showBtnElem = document.querySelector(".open-add-book-dialog-button");
-const dialogElem1 = document.getElementById("dialog");
-const dialogElem2 = document.getElementById("dialog2");
-const addBookButtonElem = document.getElementById("set-player-name-button");
+    const showSetPlayerNameDialog = () => {
+        setPlayerNameDialog.showModal();
+    }
 
-showBtnElem.addEventListener("click", () => {
-    dialogElem2.showModal();
-});
+    const showRestartGameDialog = (result) => {
+        restartGameDialog.showModal();
+                restartGameDialog.innerHTML = `
+        <div class="dialog-flex">
+            <span class="dialog-main-title">${result === true ? `${board.getActivePlayer().getName()} wins!` : "It's a draw!"}</span>
+            <div class="player-scores-list">
+                <div class="player-score-block">
+                    <span class="player-name">${board.player1.getName()}</span>
+                    <span class="player-score">${board.player1.getVictories()}</span>
+                </div>
+                <div class="player-score-block">
+                    <span class="player-name">${board.player2.getName()}</span>
+                    <span class="player-score">${board.player2.getVictories()}</span>
+                </div>
+            </div>
+            <button class="dialog-confirm-button" id="restart-game">Restart</button>
+        </div>
+        `;
 
-addBookButtonElem.addEventListener("click", () => {
-    event.preventDefault();
-    dialogElem2.close();
-});
+        const restartGameButton = document.getElementById("restart-game");
 
+        restartGameButton.addEventListener("click", () => {
+            event.preventDefault();
+            
+            board.restartGame();
+            updateBoard();
 
+            restartGameDialog.close();
+        });
+    }
 
-const boardView2 = createViewController();
+    boardElement.addEventListener("click", (event) => {
+        const postitionView = event.target.closest(".position");
+        if (!postitionView) return;
+        const positionCoordinates = JSON.parse(postitionView.dataset.position);
+        board.getActivePlayer().placePiece(positionCoordinates[0], positionCoordinates[1]);
+        updateBoard();
 
-// let product = document.getElementById("test").dataset.position;
-// console.log("bruh", JSON.parse(product))
+    });
 
+    setPlayerNameButton.addEventListener("click", () => {
+        event.preventDefault();
 
-//   <div class="book-card">
-//       <div class="book-id">${book.id}</div>
-//       <div class="book-info">
-//           <div class="book-title">${book.title}</div>
-//           <div class="book-author">${book.author}</div>
-//       </div>
-//       <div class="book-pages">${book.pages} pages</div>
-//       <div class="book-button-list">
-//           <button class="mark-book-button ${book.read ? 'read' : ''}"><img src="./assets/check-bold.svg" alt="check"><span>${book.read ? 'Read' : 'Mark as read'}</span></button>
-//           <button class="delete-book-button"><img src="./assets/delete.svg" alt="trash"><span>Delete</span></button>
-//       </div>
-//   </div>
+        const formData = new FormData(formElem);
+        if (formData.values().some(value => !value)) return;
+
+        const { player1Name, player2Name } = Object.fromEntries(formData.entries());
+        board.player1.setName(player1Name);
+        board.player2.setName(player2Name);
+
+        setPlayerNameDialog.close();
+    });
+
+    return { updateBoard, updateMessageTurn, showSetPlayerNameDialog, showRestartGameDialog }
+})();
+
+viewController.updateBoard();
+viewController.showSetPlayerNameDialog();

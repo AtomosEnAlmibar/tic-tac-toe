@@ -101,6 +101,15 @@ dialog {
     font-size: 56px;
 }
 
+.turn-message {
+    margin-top: 55px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+    font-size: 48px;
+}
+
 .fieldset {
     display: flex;
     flex-direction: column;

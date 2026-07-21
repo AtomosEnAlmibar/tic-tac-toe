@@ -12,39 +12,24 @@
 <body>
     <div class="board">
     </div>
-    <button class="open-add-book-dialog-button">Add book</button>
+    <div class="turn-message"></div>
     <dialog id="set-player-name-dialog">
         <form class="dialog-flex">
             <span class="dialog-main-title">Select names</span>
             <div class="form-block">
                 <div class="fieldset">
                     <label for="title">Player 1</label>
-                    <input type="text" name="title" id="title" required>
+                    <input type="text" name="player1Name" id="player1Name" required>
                 </div>
                 <div class="fieldset">
                     <label for="author">Player 2</label>
-                    <input type="text" name="author" id="author" required>
+                    <input type="text" name="player2Name" id="player2Name" required>
                 </div>
             </div>
             <button class="dialog-confirm-button" id="set-player-name-button" type="submit">Confirm</button>
         </form>
     </dialog>
-    <dialog id="restart-game-dialog">
-        <div class="dialog-flex">
-            <span class="dialog-main-title">Player 1 wins!</span>
-            <div class="player-scores-list">
-                <div class="player-score-block">
-                    <span class="player-name">Player 1</span>
-                    <span class="player-score">1</span>
-                </div>
-                <div class="player-score-block">
-                    <span class="player-name">Player 2</span>
-                    <span class="player-score">0</span>
-                </div>
-            </div>
-            <button class="dialog-confirm-button" id="restart-game">Restart</button>
-        </div>
-    </dialog>
+    <dialog id="restart-game-dialog"></dialog>
 </body>
 
 </html>
